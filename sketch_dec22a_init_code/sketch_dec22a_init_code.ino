@@ -1,3 +1,4 @@
+//#include "custom_library.h"
 class zLED{
   private:
     boolean state, delta_state;
@@ -8,8 +9,8 @@ class zLED{
     }zLimits;
   public:
   /// SETUP
-    enum { success, fail};
-    zLED(){pin =0; state = false; brtns = 0; delta_state = false;}                        // DONE  - update
+    enum { fail, success };
+    zLED(){pin =0; state = false; brtns = 0; delta_state = false;}    // DONE  - update
     boolean setPin(int a){ this->pin =  (a>0 && a<600)?  a : 0;  }    // DONE
   /// PROCESS
     boolean  process(  ){                                             // DONE 
@@ -19,40 +20,26 @@ class zLED{
     boolean getDeltaState(){ return delta_state;}  // in case you missed the return of process, use this function to check again..
   /// MANIPULATE
     void brtUp(){
-      brtns = brtns == zLimits.MAXbrt ? zLimits.MAXbrt : brtns+1;
+      brtns = brtns >= zLimits.MAXbrt ? zLimits.MAXbrt : brtns+1;
     }
     void brtDown(){
-      brtns = brtns == zLimits.MINbrt ? zLimits.MINbrt : brtns-1;
+      brtns = brtns <= zLimits.MINbrt ? zLimits.MINbrt : brtns-1;
     }
     boolean setGoal(boolean to){
-      if(to){
-        brtUp();
-      }
-      else{
-        brtDown();
-      }
+      if(to) brtUp();
+      else   brtDown();
     }
     boolean setState(boolean to){  // returns true when a change occured
-     if(state){
-       if(!to){         // change ON -> OFF
-           if(brtns > zLimits.MINbrt){
-            brtns --; 
-           }
-           if (brtns == zLimits.MINbrt) state = false; delta_state = true; return true;
-       }    
-     }
-     else{
-       if(to){          // change OFF -> ON
-          if(brtns < zLimits.MAXbrt){
-            brtns++;
-          }
-          if(brtns == zLimits.MAXbrt) state = true; delta_state = true; return true;
-       }
-     } 
+     if(state)if(!to)         // change ON -> OFF
+          brtDown();
+     else     if(to)          // change OFF -> ON
+          brtUp();
      delta_state = false; 
      return false;
     }
 };
+
+
 class z6bitDigit{
 private:
   zLED mleds[6];
@@ -93,18 +80,18 @@ class zSecond : public z6bitDigit{
  };
 
 // Global Object Declares:
-z6bitDigit second;
-zLED leds[6];
+z6bitDigit seconds_out;
+//zLED leds[6];
 // Global vars
 int S = 0;
-boolean st;
-boolean leds_ds[6];
+//boolean st;
+//boolean leds_ds[6];
  
 void setup(){
 // Bits
  for(int i=0; i<6; i++){
-  leds[i].setPin(i+2);
-  leds_ds[i] = false;
+  //leds[i].setPin(i+2);
+  //leds_ds[i] = false;
  }
 /* leds[0].setPin(2);
  leds[1].setPin(3);
