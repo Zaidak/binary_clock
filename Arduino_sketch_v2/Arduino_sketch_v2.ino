@@ -2,7 +2,7 @@
 class zLED{
   private:
     boolean state, delta_state;
-    int pin, brtns;
+    int pin, brtns, stepsize;
     const struct Limits{
         int MAXbrt, MINbrt, minDtus;
         Limits(){MAXbrt = 255; MINbrt = 0; minDtus=2;}
@@ -10,31 +10,38 @@ class zLED{
   public:
   /// SETUP
     enum { fail, success };
-    zLED(){pin =0; state = false; brtns = 0; delta_state = false;}    // DONE  - update
+    zLED(){pin =0; state = false; brtns = 0; delta_state = false; stepsize = 5;}    // DONE  - update
     boolean setPin(int a){ this->pin =  (a>0 && a<600)?  a : 0;  }    // DONE
-  /// PROCESS
+  /// PROCESS returns true is brithness is anything but zero
     boolean  process(  ){                                             // DONE 
      analogWrite(pin, brtns); 
-     return true; 
+     if (brtns ==0){
+       return false;
+     }
+     else
+       return true; 
     }
   /// MANIPULATE
 //    void brtUp(){       brtns = brtns >= zLimits.MAXbrt ? zLimits.MAXbrt : brtns+1;}
 //    void brtDown(){     brtns = brtns <= zLimits.MINbrt ? zLimits.MINbrt : brtns-1;}
     void brtUp(){     /*  brtns = brtns >= 255 ? 255 : brtns+1;*/ 
-      if(brtns >= 255) {brtns = 255; return;}
-      if(brtns <= 0)   {brtns = 1; return;}
-      brtns++;
+      if(brtns >= 255) {brtns = zLimits.MAXbrt; return;}//{brtns = 255; return;}
+      if(brtns <= 0)   {brtns = 1; return;}//{brtns = 1; return;}
+     // brtns++;
+      brtns += stepsize;
     }
     void brtDown(){    // brtns = brtns <= 0 ? 0 : brtns-1;}
       if(brtns >= 255) {brtns = 254; return;}
-      if(brtns <= 0)   {brtns = 0; return;}
-      brtns--;
+      if(brtns <= 0)   {brtns = zLimits.MINbrt; return;}
+     // brtns--;
+      brtns -= stepsize;
     }
+    boolean setStepSize(int s){ if(s >= 1 && s<= 254) {stepsize= s;return true;} else return false;}
     boolean getDeltaState(){ return delta_state;}  // in case you missed the return of process, use this function to check again..
     int getPin(){return this->pin;}
     int getBrtns(){return this->brtns;}
     boolean getState(){ return this->state;}
-    boolean setGoal(boolean to){    if(to) brtUp(); else   brtDown(); }
+    boolean setGoal(boolean to){    if(to) brtDown() ; else  brtUp(); }//{    if(to) brtUp(); else   brtDown(); }
     boolean setState(boolean to){  // returns true when a change occured
      if(state)if(!to) brtDown();        // change ON -> OFF
      else     if(to)  brtUp();          // change OFF -> ON
@@ -73,11 +80,18 @@ private:
     int v =val;
     for(int i=0; i<6; i ++){
      mleds[i].setGoal(v%2==0);
+  //   mleds[i].setState(v%2==0);
      v/=2;
      mleds[i].process();
     }
     //Serial.println(showNum);
     return true;
+  }
+  boolean setStepSize(int s){
+    for(int i=0;i<6;i++){
+      mleds[i].setStepSize(s);
+    }
+    return true; 
   }
 };
 
@@ -132,7 +146,7 @@ void loop(){
    Serial.println(S);
  }
  seconds_out.showNum(S);
-    
+ //    seconds_out.showNum(3);
 
  // Serial.println(S);
 // for(int i=0;i<6; i++){
