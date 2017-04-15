@@ -103,17 +103,15 @@ static const int ledCount = 6;
 
 // Global Object Declares:
 z6bitDigit seconds_out;
-const int analogInPin = A0;  // Analog input pin that the potentiometer is attached to
-int sensorValue = 0;        // value read from the pot
-
 // Global vars
 int S = 0;
 int clk; 
-int clkT;
 void setup(){
  S=0;
  clk=0;
- clkT=300;    //300 is about one second. with delay 8
+ 
+ //randomSeed(0);
+ //Debug stuff:
  Serial.begin(9600);
  while(!Serial){}
  seconds_out.setStepSize(8);
@@ -121,26 +119,34 @@ void setup(){
 
 void loop(){
  clk++;
- if(clk >= clkT){
+ if(clk >= 90){
    S++;
    S%= 64;
    clk = 0;
-//   Serial.println(S);
-  // read the analog in value:
+   Serial.println(S);
  }
  seconds_out.showNum(S);
  seconds_out.setStepSize(S);
-  sensorValue = analogRead(analogInPin);            
-  // map it to the range of the analog out:
-//  outputValue = map(sensorValue, 0, 1023, 0, 255);  
-  // change the analog out value:
-//  analogWrite(analogOutPin, outputValue);           
+ //    seconds_out.showNum(3);
 
-  // print the results to the serial monitor:
-  Serial.print("sensor = " );                       
-  Serial.println(sensorValue);      
-//  Serial.print("\t output = ");      
-//  Serial.println(outputValue);   
-   
- delay(8);
+ // Serial.println(S);
+// for(int i=0;i<6; i++){
+//  if(leds[i].getState()){ leds[i].setGoal(false); /*Serial.print("TRUE");*/}
+//  else                  { leds[i].setGoal(true); /*Serial.print("FALSE");*/}
+  //leds[i].setGoal(random(3)==1); 
+//  leds_ds[i] = leds[i].process();
+//  leds[i].process();
+//  Serial.println(leds[i].getBrtns());
+// }
+  //if( leds_ds[0] )st = st? false : true;
+                     
+                     // seconds_out.showNum(S);
+ /* for(int i=0;i<6;i++){                    
+    seconds_out.mleds[i].setState(true);
+    seconds_out.mleds[i].process();
+  }*/
+// delay(random(10));    // ONLY LOOP DELAY
+delay(8);
+
 } 
+
